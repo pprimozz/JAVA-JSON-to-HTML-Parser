@@ -24,9 +24,7 @@ public class Parser {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return contentBuilder.toString();
-
     }
 
     public String parseJsontoHTML(Set<Map.Entry<String, JsonElement>> entries, Boolean firstLoop, StringBuilder result2) {
@@ -35,7 +33,7 @@ public class Parser {
         if (firstLoop == true) {
             result.append("<!DOCTYPE html>");
             result.append(System.getProperty("line.separator"));
-            result.append("<HTML>");
+            result.append("<html>");
             result.append(System.getProperty("line.separator"));
         } else {
             result = result2;
@@ -49,7 +47,7 @@ public class Parser {
                 } else if (entry.getKey().equals("body")) {
                     result.append("<" + entry.getKey() + ">");
                 } else if (entry.getKey().equals("viewport")) {
-                    result.append("<meta name='" + entry.getKey() + "' content='");
+                    result.append("<meta name=\"" + entry.getKey() + "\" content=\"");
                 } else if (entry.getKey().equals("style")) {
                     result.append(entry.getKey() + "=\"");
 
@@ -102,23 +100,29 @@ public class Parser {
                     //ČE JE ARRAY
                     else if (entryInnerObj.getValue().isJsonArray()) {
                         // pretvori v JSONArray in loopa
-                        System.out.println(entryInnerObj.getKey());
-                        JsonArray jsonarr = entryInnerObj.getValue().getAsJsonArray();
-                        for (JsonElement ell : jsonarr) {
-                            //pretvori vsak element arraya c JSONObject
-                            JsonObject jsonArrObj = ell.getAsJsonObject();
-                            for (Map.Entry<String, JsonElement> entryInnerArr : jsonArrObj.entrySet()) {
-                                if (entryInnerArr.getValue().isJsonObject()) {
-                                    System.out.println(entryInnerArr.getKey());
-                                    parseJsontoHTML(entryInnerArr.getValue().getAsJsonObject().entrySet(), false, result);
-                                } else {
-                                    System.out.println(entryInnerArr.getKey() + " " + entryInnerArr.getValue());
+                            if(entryInnerObj.getKey().equals("link")) {
+                                //result.append("<link ");
+                                JsonArray jsonarr = entryInnerObj.getValue().getAsJsonArray();
+                                for (JsonElement ell : jsonarr) {
+                                    //pretvori vsak element arraya c JSONObject
+                                    JsonObject jsonArrObj = ell.getAsJsonObject();
+                                    result.append("<link ");
+                                    for (Map.Entry<String, JsonElement> entryInnerArr : jsonArrObj.entrySet()) {
+                                        if (entryInnerArr.getValue().isJsonObject()) {
+                                            parseJsontoHTML(entryInnerArr.getValue().getAsJsonObject().entrySet(), false, result);
+                                        } else {
+                                            result.append(entryInnerArr.getKey() +"=" + entryInnerArr.getValue()+" ");
+                                        }
+                                    }
+                                    result.append(">");
+                                    result.append(System.getProperty("line.separator"));
                                 }
                             }
-                        }
-                    } else {
+                    }
+
+                    else {
                         if (entry.getKey().equals("viewport")) {
-                            result.append(entryInnerObj.getKey() + "=" + entryInnerObj.getValue() + ",");
+                            result.append(entryInnerObj.getKey() + "=" + entryInnerObj.getValue().toString().replaceAll("\"", "") + ",");
                         } else if (entryInnerObj.getKey().equals("title")) {
                             result.append("<" + entryInnerObj.getKey() + ">" + entryInnerObj.getValue().toString().replaceAll("\"", "") + "</" + entryInnerObj.getKey() + ">");
                             result.append(System.getProperty("line.separator"));
@@ -131,7 +135,7 @@ public class Parser {
                 if (!entry.getKey().equals("html")) {
                     if (entry.getKey().equals("viewport")) {
                         result.deleteCharAt(result.length() - 1);
-                        result.append("'>");
+                        result.append("\">");
                     } else if (entry.getKey().equals("style")) {
                         result.deleteCharAt(result.length() - 1);
                         result.append("\">");
@@ -141,23 +145,7 @@ public class Parser {
                     }
                 }
             }
-            //ČE JE ARRAY
-            else if (entry.getValue().isJsonArray()) {
-                // pretvori v JSONArray in loopa
-                JsonArray jsonarr = entry.getValue().getAsJsonArray();
-                for (JsonElement ell : jsonarr) {
-                    //pretvori vsak element arraya c JSONObject
-                    JsonObject jsonArrObj = ell.getAsJsonObject();
-                    for (Map.Entry<String, JsonElement> entryInnerArr : jsonArrObj.entrySet()) {
-                        if (entryInnerArr.getValue().isJsonObject()) {
-                            System.out.println(entryInnerArr.getKey());
-                            parseJsontoHTML(entryInnerArr.getValue().getAsJsonObject().entrySet(), false, result);
-                        } else {
-                            System.out.println(entryInnerArr.getKey() + " " + entryInnerArr.getValue());
-                        }
-                    }
-                }
-            } else {
+             else {
                 if (entry.getKey().equals("charset")) {
                     result.append(entry.getKey() + "=" + entry.getValue() + ">");
                     result.append(System.getProperty("line.separator"));
@@ -170,6 +158,10 @@ public class Parser {
                 } else if (!entry.getKey().equals("doctype") && !entry.getKey().equals("language")) {
                     result.append(entry.getKey() + "=" + entry.getValue() + " ");
                 }
+                else if (entry.getKey().equals("language")) {
+                    result.replace(15,23,"<html lang="+entry.getValue()+">");
+                    result.append(System.getProperty("line.separator"));
+                }
             }
 
         }
@@ -178,7 +170,7 @@ public class Parser {
     }
 
     public void witeFile(String content) {
-        content += "\n </HTML>";
+        content += "\n </html>";
         try {
             this.myWriter = new FileWriter("filename.html");
             this.myWriter.write(content);

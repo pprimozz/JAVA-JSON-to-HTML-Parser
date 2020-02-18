@@ -23,7 +23,7 @@ public class Main {
         Parser myparser = new Parser();
 
         //tukaj se setira vhodna JSON datoteka
-        String filePath = "C:\\Users\\Primoz\\Documents\\JSONtoHTMLParser\\src\\main\\java\\helloWorld.json";
+        String filePath = "C:\\Users\\Primož\\Documents\\JSONtoHTMLParser\\src\\main\\java\\com\\mycompany\\jsontohtmlparser\\helloWorld.json";
 
         //najprej konvertira json file v String zaradi lažje nadaljnje obdelave
         String jsonStr = myparser.convertJSONtoString(filePath);
